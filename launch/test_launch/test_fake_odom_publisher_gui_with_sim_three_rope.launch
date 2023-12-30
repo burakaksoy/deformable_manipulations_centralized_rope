@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<launch>
+
+<!-- DLO Default parameter file location -->
+<arg name="dlo_simulator_config"              
+        default="$(find deformable_manipulations_centralized_rope)/config/dlo_simulator.yaml"/>
+<arg name="dlo_simulator_subs_config"              
+        default="$(find deformable_manipulations_centralized_rope)/config/dlo_simulator_subs_three_rope.yaml"/>
+
+<arg name="dlo_to_polygon_distance_2d_config" 
+        default="$(find deformable_manipulations_centralized_rope)/config/dlo_to_polygon_distance_2d_floor.yaml"/>
+
+<!-- Change below argument values to match with the yaml files -->
+<arg name="dlo_points_topic_name" 
+        default="dlo_points"/>
+
+<arg name="custom_static_particles_odom_topic_prefix" 
+        default="odom_particle_"/>
+
+<arg name="odom_follower_particle_topic_prefix" 
+        default="odom_follower_"/>
+
+<arg name="dlo_node_console_logs" 
+        default="log"/>
+
+<!-- <arg name="follower_1_id" default="27"/> -->
+<!-- <arg name="follower_2_id" default="44"/> -->
+
+<!-- Set this to false if you would like to launch the controller seperately -->
+<arg name="launch_controller" default="true" /> 
+
+<!-- Load GLOBAL parameters into global namespace -->
+<include file="$(find deformable_manipulations_centralized_rope)/launch/load_parameters.launch">
+    <arg name="namespace" value="" />
+    <arg name="dlo_simulator_config" value="$(arg dlo_simulator_config)" />
+    <arg name="dlo_simulator_subs_config" value="$(arg dlo_simulator_subs_config)" />
+</include>
+
+<!-- REAL DLO Representative Simulation -->
+<group>
+    <arg name="simulation_name" value="dlo_simulator" />
+    <arg name="distance_publisher_name" value="dlo_to_polygon_distance" />
+
+    <!-- Load parameters into dlo_simulator's private namespace -->
+    <include file="$(find deformable_manipulations_centralized_rope)/launch/load_parameters.launch">
+        <arg name="namespace" value="$(arg simulation_name)" />
+        <arg name="dlo_simulator_config" value="$(arg dlo_simulator_config)" />
+        <arg name="dlo_simulator_subs_config" value="$(arg dlo_simulator_subs_config)" />
+    </include>
+
+    <!-- Simulation -->
+    <node type="dlo_simulator_stiff_rods_node" name="$(arg simulation_name)" pkg="dlo_simulator_stiff_rods" output="$(arg dlo_node_console_logs)">
+        <rosparam param="point_marker_scale"                        subst_value="true">0.01</rosparam>
+
+        <rosparam param="point_marker_color_r"                      subst_value="true">1.0</rosparam>
+        <rosparam param="point_marker_color_g"                      subst_value="true">1.0</rosparam>
+        <rosparam param="point_marker_color_b"                      subst_value="true">1.0</rosparam>
+        <rosparam param="point_marker_color_a"                      subst_value="true">0.7</rosparam>
+
+        <rosparam param="line_marker_scale_multiplier"              subst_value="true">8.0</rosparam>
+
+        <rosparam param="line_marker_color_r"                       subst_value="true">0.0</rosparam>
+        <rosparam param="line_marker_color_g"                       subst_value="true">0.0</rosparam>
+        <rosparam param="line_marker_color_b"                       subst_value="true">0.0</rosparam>
+        <rosparam param="line_marker_color_a"                       subst_value="true">1.0</rosparam>
+    </node>
+
+    <!-- Launch the Distance Publisher between the DLO and the specified Polygon (2D) -->
+    <node type="dlo_to_polygon_distance_2d.py" name="$(arg distance_publisher_name)" pkg="deformable_manipulations_centralized_rope" output="screen">
+        <rosparam command="load" file="$(arg dlo_to_polygon_distance_2d_config)" subst_value="true" />
+        <rosparam param="dlo_marker_topic_name"                      subst_value="true">/$(arg dlo_points_topic_name)</rosparam>
+        <rosparam param="pub_distance_topic_name"                    subst_value="true">/min_distance</rosparam>
+        <rosparam param="viz_polygon_topic_name"                     subst_value="true">/polygon</rosparam>
+        <rosparam param="viz_min_distance_line_topic_name"           subst_value="true">/min_distance_line_marker</rosparam>
+        <rosparam param="viz_min_distance_line_color_rgba"           subst_value="true">[0.0, 0.0, 0.0, 0.5]</rosparam>
+    </node>
+
+</group>
+
+
+<!-- Launch RVIZ  -->
+<node type="rviz" name="rviz" pkg="rviz" args="-d $(find deformable_manipulations_centralized_rope)/rviz/test_fake_odom_publisher_gui_with_sim_three_rope.rviz" output="screen"/>
+
+<!-- SPACE MOUSE -->
+<!-- <include file="$(find spacenav_node)/launch/classic.launch"/> -->
+<node type="rqt_ez_publisher" name="rqt_ez_publisher" pkg="rqt_ez_publisher" output="log"></node>
+
+<!-- GUI -->
+<node type="fake_odom_publisher_gui.py" name="fake_odom_publisher_gui" pkg="deformable_manipulations_centralized_rope" output="screen"></node>
+
+</launch>

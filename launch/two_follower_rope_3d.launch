@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<launch>
+<!-- LAUNCH FILE FOR TWO FOLLOWER PARTICLES IN DLO -->
+
+<!-- DLO Default parameter file location -->
+<arg name="dlo_simulator_config"              
+        default="$(find deformable_manipulations_centralized_rope)/config/dlo_simulator.yaml"/>
+<arg name="dlo_simulator_subs_config"              
+        default="$(find deformable_manipulations_centralized_rope)/config/dlo_simulator_subs_two_rope_3d.yaml"/>
+
+<arg name="object_to_mesh_distance_config" 
+        default="$(find deformable_manipulations_centralized_rope)/config/object_to_mesh_distance.yaml"/>
+
+<!-- Change below argument values to match with the yaml files -->
+<arg name="dlo_points_topic_name" 
+        default="dlo_points"/>
+
+<arg name="custom_static_particles_odom_topic_prefix" 
+        default="odom_particle_"/>
+
+<arg name="odom_follower_particle_topic_prefix" 
+        default="odom_follower_"/>
+
+<arg name="dlo_node_console_logs" 
+        default="log"/>
+
+<arg name="follower_1_id" default="0"/>
+<arg name="follower_2_id" default="27"/>
+
+<!-- Set this to false if you would like to launch the controller seperately -->
+<arg name="launch_controller" default="true" /> 
+
+<!-- Load GLOBAL parameters into global namespace -->
+<include file="$(find deformable_manipulations_centralized_rope)/launch/load_parameters.launch">
+    <arg name="namespace" value="" />
+    <arg name="dlo_simulator_config" value="$(arg dlo_simulator_config)" />
+    <arg name="dlo_simulator_subs_config" value="$(arg dlo_simulator_subs_config)" />
+</include>
+
+
+<!-- REAL DLO Representative Simulation -->
+<group>
+    <arg name="simulation_name" value="dlo_simulator" />
+    <arg name="distance_publisher_name" value="dlo_to_obstacle_distance" />
+
+    <!-- Load parameters into dlo_simulator's private namespace -->
+    <include file="$(find deformable_manipulations_centralized_rope)/launch/load_parameters.launch">
+        <arg name="namespace" value="$(arg simulation_name)" />
+        <arg name="dlo_simulator_config" value="$(arg dlo_simulator_config)" />
+        <arg name="dlo_simulator_subs_config" value="$(arg dlo_simulator_subs_config)" />
+    </include>
+
+    <!-- Simulation -->
+    <node type="dlo_simulator_stiff_rods_node" name="$(arg simulation_name)" pkg="dlo_simulator_stiff_rods" output="$(arg dlo_node_console_logs)">
+        <rosparam param="point_marker_scale"                        subst_value="true">0.01</rosparam>
+
+        <rosparam param="point_marker_color_r"                      subst_value="true">1.0</rosparam>
+        <rosparam param="point_marker_color_g"                      subst_value="true">1.0</rosparam>
+        <rosparam param="point_marker_color_b"                      subst_value="true">1.0</rosparam>
+        <rosparam param="point_marker_color_a"                      subst_value="true">0.7</rosparam>
+
+        <rosparam param="line_marker_scale_multiplier"              subst_value="true">8.0</rosparam>
+
+        <rosparam param="line_marker_color_r"                       subst_value="true">0.0</rosparam>
+        <rosparam param="line_marker_color_g"                       subst_value="true">0.0</rosparam>
+        <rosparam param="line_marker_color_b"                       subst_value="true">0.0</rosparam>
+        <rosparam param="line_marker_color_a"                       subst_value="true">1.0</rosparam>
+    </node>
+
+    <!-- Launch the Distance Publisher between the DLO and the specified Mesh (3D) -->
+    <node type="object_to_mesh_distance.py" name="$(arg distance_publisher_name)" pkg="deformable_manipulations_centralized_rope" output="screen">
+        <rosparam command="load" file="$(arg object_to_mesh_distance_config)" subst_value="true" />
+        <rosparam param="object_marker_topic_name"          subst_value="true">/$(arg dlo_points_topic_name)</rosparam>
+        <rosparam param="pub_distance_topic_name"           subst_value="true">/min_distance</rosparam>
+        <rosparam param="viz_mesh_topic_name"               subst_value="true">/obstacle_mesh</rosparam>
+        <rosparam param="viz_min_distance_line_topic_name"  subst_value="true">/min_distance_line_marker</rosparam>
+        <rosparam param="viz_min_distance_line_color_rgba"  subst_value="true">[0.0, 0.0, 0.0, 0.5]</rosparam>
+        <rosparam param="mesh_publish"                      subst_value="true">True</rosparam>
+    </node>
+
+</group>
+
+<!-- Perturbation publisher for each follower particle -->
+<node type="perturbation_publisher.py" name="perturbation_publisher" pkg="deformable_manipulations_centralized_rope" output="screen">
+    <rosparam param="dlo_marker_topic_name"  subst_value="true">/$(arg dlo_points_topic_name)</rosparam>
+    <rosparam param="pub_odom_topic_prefix"  subst_value="true">$(arg odom_follower_particle_topic_prefix)</rosparam>
+</node>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- Perturbed XYZ simulations and distance publishers -->
+
+<!-- Particle $(arg follower_1_id) -->
+<include file="$(find deformable_manipulations_centralized_rope)/launch/perturbed_xyz_simulations.launch">
+    <arg name="particle_id"                               value="$(arg follower_1_id)"/>
+
+    <arg name="dlo_simulator_config"                      value="$(arg dlo_simulator_config)" />
+    <arg name="dlo_simulator_subs_config"                 value="$(arg dlo_simulator_subs_config)" />
+    <arg name="object_to_mesh_distance_config"            value="$(arg object_to_mesh_distance_config)"/>
+    <arg name="dlo_points_topic_name"                     value="$(arg dlo_points_topic_name)"/>
+    <arg name="custom_static_particles_odom_topic_prefix" value="$(arg custom_static_particles_odom_topic_prefix)"/>
+    <arg name="odom_follower_particle_topic_prefix"       value="$(arg odom_follower_particle_topic_prefix)"/>
+    <arg name="dlo_node_console_logs"                     value="$(arg dlo_node_console_logs)" />
+</include>
+
+<!-- Particle $(arg follower_2_id) -->
+<include file="$(find deformable_manipulations_centralized_rope)/launch/perturbed_xyz_simulations.launch">
+    <arg name="particle_id"                               value="$(arg follower_2_id)"/>
+
+    <arg name="dlo_simulator_config"                      value="$(arg dlo_simulator_config)" />
+    <arg name="dlo_simulator_subs_config"                 value="$(arg dlo_simulator_subs_config)" />
+    <arg name="object_to_mesh_distance_config"            value="$(arg object_to_mesh_distance_config)"/>
+    <arg name="dlo_points_topic_name"                     value="$(arg dlo_points_topic_name)"/>
+    <arg name="custom_static_particles_odom_topic_prefix" value="$(arg custom_static_particles_odom_topic_prefix)"/>
+    <arg name="odom_follower_particle_topic_prefix"       value="$(arg odom_follower_particle_topic_prefix)"/>
+    <arg name="dlo_node_console_logs"                     value="$(arg dlo_node_console_logs)" />
+</include>
+
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<!-- Launch RVIZ  -->
+<node type="rviz" name="rviz" pkg="rviz" args="-d $(find deformable_manipulations_centralized_rope)/rviz/two_follower_rope_3d.rviz" output="screen"/>
+
+<!-- SPACE MOUSE & RQT EZ Publisher-->
+<!-- <include file="$(find spacenav_node)/launch/classic.launch"/> -->
+<node type="rqt_ez_publisher" name="rqt_ez_publisher" pkg="rqt_ez_publisher" output="log"></node>
+
+<!-- GUI -->
+<node type="fake_odom_publisher_gui.py" name="fake_odom_publisher_gui" pkg="deformable_manipulations_centralized_rope" output="screen"></node>
+
+<!-- CENTRALIZED CONTROLLER -->
+<group if="$(arg launch_controller)">
+    <include file="$(find deformable_manipulations_centralized_rope)/launch/dlo_velocity_controller_3d_safe.launch">
+        <arg name="controller_name"                     value="dlo_velocity_controller" />
+        <arg name="dlo_points_topic_name"               value="/$(arg dlo_points_topic_name)" />
+        <arg name="aux_enabled"                         value="False"/>
+        <arg name="aux_bias_direction"                  value=""/>
+    </include>
+</group>
+
+<!-- Trail Printers -->
+<group>
+    <arg name="particle_id" value="$(arg follower_1_id)" />
+    <node type="trail_maker.py" name="trail_maker_$(arg particle_id)" pkg="deformable_manipulations_centralized_rope" output="screen">
+        <rosparam param="id"                        subst_value="true">$(arg particle_id)</rosparam>
+
+        <rosparam param="trail_marker_array_topic"  subst_value="true">trail_marker_array_$(arg particle_id)</rosparam>
+        <rosparam param="odom_topic"                subst_value="true">$(arg custom_static_particles_odom_topic_prefix)$(arg particle_id)</rosparam>
+        <rosparam param="reset_trail_service"       subst_value="true">reset_trail_service_$(arg particle_id)</rosparam>
+        
+        <rosparam param="header_frame_id"           subst_value="true">map</rosparam>
+
+        <rosparam param="marker_scale"              subst_value="true">0.01</rosparam>
+        <rosparam param="marker_color"              subst_value="true">{r: 1.0, g: 0.0, b: 1.0, a: 0.6}</rosparam>
+
+        <rosparam param="text_scale"                subst_value="true">0.1</rosparam>
+        <rosparam param="text_color"                subst_value="true">{r: 0.0, g: 0.0, b: 0.0, a: 1.0}</rosparam>
+        <rosparam param="text_offset_xyz"           subst_value="true">{'x': 0.0, 'y': 0.0, 'z': 0.1}</rosparam>
+
+        <rosparam param="sphere_scale"              subst_value="true">0.07</rosparam>
+        <rosparam param="sphere_color"              subst_value="true">{r: 1.0, g: 0.0, b: 1.0, a: 0.8}</rosparam>
+    </node>
+</group>
+
+<group>
+    <arg name="particle_id" value="$(arg follower_2_id)" />
+    <node type="trail_maker.py" name="trail_maker_$(arg particle_id)" pkg="deformable_manipulations_centralized_rope" output="screen">
+        <rosparam param="id"                        subst_value="true">$(arg particle_id)</rosparam>
+
+        <rosparam param="trail_marker_array_topic"  subst_value="true">trail_marker_array_$(arg particle_id)</rosparam>
+        <rosparam param="odom_topic"                subst_value="true">$(arg custom_static_particles_odom_topic_prefix)$(arg particle_id)</rosparam>
+        <rosparam param="reset_trail_service"       subst_value="true">reset_trail_service_$(arg particle_id)</rosparam>
+        
+        <rosparam param="header_frame_id"           subst_value="true">map</rosparam>
+
+        <rosparam param="marker_scale"              subst_value="true">0.01</rosparam>
+        <rosparam param="marker_color"              subst_value="true">{r: 0.5, g: 0.0, b: 0.5, a: 0.6}</rosparam>
+
+        <rosparam param="text_scale"                subst_value="true">0.1</rosparam>
+        <rosparam param="text_color"                subst_value="true">{r: 0.0, g: 0.0, b: 0.0, a: 1.0}</rosparam>
+        <rosparam param="text_offset_xyz"           subst_value="true">{'x': 0.0, 'y': 0.0, 'z': 0.1}</rosparam>
+
+        <rosparam param="sphere_scale"              subst_value="true">0.07</rosparam>
+        <rosparam param="sphere_color"              subst_value="true">{r: 0.5, g: 0.0, b: 0.5, a: 0.8}</rosparam>
+    </node>
+</group>
+
+<!-- TODO: Trail printer for Leader frame ?? -->
+<!-- <group>
+    <arg name="particle_id" value="0" />
+    <node type="trail_maker.py" name="trail_maker_$(arg particle_id)" pkg="deformable_manipulations_centralized_rope" output="screen">
+        <rosparam param="id"                            subst_value="true">$(arg particle_id)</rosparam>
+
+        <rosparam param="trail_marker_array_topic"      subst_value="true">trail_marker_array_$(arg particle_id)</rosparam>
+        <rosparam param="odom_topic"                    subst_value="true">$(arg custom_static_particles_odom_topic_prefix)$(arg particle_id)</rosparam>
+        <rosparam param="reset_trail_service"           subst_value="true">reset_trail_service_$(arg particle_id)</rosparam>
+        
+        <rosparam param="header_frame_id"               subst_value="true">map</rosparam>
+
+        <rosparam param="marker_scale"                  subst_value="true">0.01</rosparam>
+        <rosparam param="marker_color"                  subst_value="true">{r: 1.0, g: 0.5, b: 0.0, a: 0.6}</rosparam>
+
+        <rosparam param="text_scale"                    subst_value="true">0.1</rosparam>
+        <rosparam param="text_color"                    subst_value="true">{r: 0.0, g: 0.0, b: 0.0, a: 1.0}</rosparam>
+        <rosparam param="text_offset_xyz"               subst_value="true">{'x': 0.0, 'y': 0.0, 'z': 0.1}</rosparam>
+
+        <rosparam param="sphere_scale"                  subst_value="true">0.07</rosparam>
+        <rosparam param="sphere_color"                  subst_value="true">{r: 1.0, g: 0.5, b: 0.0, a: 0.8}</rosparam>
+    </node>
+</group> -->
+
+
+</launch>

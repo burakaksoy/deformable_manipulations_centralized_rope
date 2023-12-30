@@ -1,0 +1,9 @@
+dlo_marker_topic_name: "/dlo_points"
+pub_distance_topic_name: "/distance_to_obj"
+pub_rate_polygon: 0.5
+viz_polygon_topic_name: "/polygon"
+viz_min_distance_line_topic_name: "/min_distance_line_marker"
+viz_min_distance_line_color_rgba: [1.0, 1.0, 1.0, 1.0]
+polygon_pts_csv_file_path: $(find deformable_manipulations_centralized_rope)/csv/surface_ceil.csv
+polygon_translate: [0.0, -5.0, 4.0]
+polygon_publish: True

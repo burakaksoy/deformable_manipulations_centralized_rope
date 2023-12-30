@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="controller_name" default="dlo_velocity_controller" />
+    <arg name="dlo_points_topic_name" default="/dlo_points" />
+
+    <arg name="aux_enabled" default="False" />
+    <arg name="aux_bias_direction" default="" /> <!-- "up", "down", or "" -->
+
+    <node type="dlo_velocity_controller_2d_safe.py" name="$(arg controller_name)" pkg="deformable_manipulations_centralized_rope" output="screen"> 
+        <rosparam param="dlo_points_topic_name"      subst_value="true">$(arg dlo_points_topic_name)</rosparam>
+        <rosparam param="min_distance_topic_prefix"  subst_value="true">/min_distance</rosparam>
+        <rosparam param="kp"                         subst_value="true">[1.0,1.0,1.0]</rosparam>
+        <rosparam param="kd"                         subst_value="true">[0.0,0.0,0.0]</rosparam>
+        <!-- Auxiliary control parameters  -->
+        <rosparam param="aux_enabled"                subst_value="true">$(arg aux_enabled)</rosparam>
+        <rosparam param="aux_bias_direction"         subst_value="true">$(arg aux_bias_direction)</rosparam>
+    </node>
+
+</launch>

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+
+<arg name="namespace" default="" />
+<arg name="dlo_simulator_config" default="" />
+<arg name="dlo_simulator_subs_config" default="" />
+
+<!-- Load DLO Default parameters -->
+<rosparam ns="$(arg namespace)" command="load" file="$(arg dlo_simulator_config)" subst_value="true" />
+
+<!-- Load DLO Substitution parameters  -->
+<!-- <rosparam ns="$(arg namespace)" param="custom_static_particles_odom_topic_prefix" subst_value="true">odom_particle_</rosparam> -->
+<!-- <rosparam ns="$(arg namespace)" param="custom_static_particles" subst_value="true">[0,13,27]</rosparam> -->
+
+<!-- Load other global parameters -->
+<!-- <rosparam ns="$(arg namespace)" param="leader_particle" subst_value="true">0</rosparam> -->
+<!-- <rosparam ns="$(arg namespace)" param="follower_particles" subst_value="true">[13,27]</rosparam> -->
+
+<rosparam ns="$(arg namespace)" command="load" file="$(arg dlo_simulator_subs_config)" subst_value="true" />
+
+</launch>

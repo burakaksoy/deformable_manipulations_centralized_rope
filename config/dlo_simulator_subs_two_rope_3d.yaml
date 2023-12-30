@@ -1,0 +1,19 @@
+# DLO simulation subs paramete
+dlo_l: 2.25 # # 3.3528 # dlo length in meters
+dlo_num_segments: 28 # max 45 # number of segment in dlo (int)
+
+dlo_young_modulus: 30.0e+6 # 30.0e+9 # 3.0e+7 # E, elasticity modulus (unit: Pa?)
+dlo_torsion_modulus: 10.0e+6 # 10.0e+9 # 1.0e+7 # G, Shear modulus in classical phsysics. (unit: Pa?)
+
+custom_static_particles_odom_topic_prefix: odom_particle_
+custom_static_particles: [0,27] 
+
+# Other global params
+odom_topic_leader: odom_leader
+follower_particles: [0,27]
+
+# Perturbation Amount Parameters
+delta_x: 0.1
+delta_y: 0.1
+delta_z: 0.1
+

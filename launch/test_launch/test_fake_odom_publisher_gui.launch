@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<launch>
+
+<!-- DLO Default parameter file location -->
+<arg name="dlo_simulator_config"              
+        default="$(find deformable_manipulations_centralized_rope)/config/dlo_simulator.yaml"/>
+<arg name="dlo_simulator_subs_config"              
+        default="$(find deformable_manipulations_centralized_rope)/config/dlo_simulator_subs_two_rope.yaml"/>
+
+<!-- Load GLOBAL parameters into global namespace -->
+<include file="$(find deformable_manipulations_centralized_rope)/launch/load_parameters.launch">
+    <arg name="namespace" value="" />
+    <arg name="dlo_simulator_config" value="$(arg dlo_simulator_config)" />
+    <arg name="dlo_simulator_subs_config" value="$(arg dlo_simulator_subs_config)" />
+</include>
+
+<!-- Launch RVIZ  -->
+<node type="rviz" name="rviz" pkg="rviz" args="-d $(find deformable_manipulations_centralized_rope)/rviz/dlo_sim_test_2_multi.rviz" output="screen"/>
+
+<!-- SPACE MOUSE -->
+<!-- <include file="$(find spacenav_node)/launch/classic.launch"/> -->
+<node type="rqt_ez_publisher" name="rqt_ez_publisher" pkg="rqt_ez_publisher" output="log"></node>
+
+<!-- GUI -->
+<node type="fake_odom_publisher_gui.py" name="fake_odom_publisher_gui" pkg="deformable_manipulations_centralized_rope" output="screen"></node>
+
+</launch>

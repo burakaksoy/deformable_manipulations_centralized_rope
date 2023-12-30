@@ -1,0 +1,88 @@
+# Gravity of environment for dlo simulation
+gravity_x: 0.0 # m/s^2
+gravity_y: 0.0 # m/s^2
+gravity_z: -9.804 # m/s^2
+
+dt: 0.003 # seconds. Simulated time per iteration of the dlo simulation.
+set_sim_rate_auto: false  # to set the simulation rate and dt automaticall, do not use
+num_substeps: 70 # 40  #40 # Number of substeps per iteration based on 2019 Small Steps XPBD paper.
+num_steps: 1 # experimental only. do not change from 1
+
+dlo_l: 2.25 # 3.3528 # dlo length in meters
+dlo_r: 0.0035 # 0.0035 # 0.0035 # dlo radius in meters
+dlo_density: 1792.89 # dlo mass per meter cube (kg/m^3)
+dlo_num_segments: 28 # max 45 # number of segment in dlo (int)
+
+dlo_zero_stretch_stiffness: 1.0e+14
+dlo_young_modulus: 30.0e+6 # 30.0e+9 # 3.0e+7 # E, elasticity modulus (unit: Pa?)
+dlo_torsion_modulus: 10.0e+6 # 10.0e+9 # 1.0e+7 # G, Shear modulus in classical phsysics. (unit: Pa?)
+
+use_zero_stretch_stiffness: true
+# use_zero_stretch_stiffness: (default: true)
+# If set to false, stretch/shear matrix will be calculated based on E,G and dlo_r 
+# and dlo_zero_stretch_stiffness parameter will be used as a scalar multiplier
+
+# Global artificial velocity damping coefficients. Defaults to 0.0. 
+global_damp_coeff_v: 1.0 # 7.1e-1 # 5.9e-1 #          7.1e-1 # 2.1e-4; // 0.9e-3
+global_damp_coeff_w: 1.0 # 7.1e-1 # 5.9e-1 # 0.9e-3 # 7.1e-1 # 2.1e-4;
+
+initial_height: 2.20 # initial dlo height from ground (m)
+
+num_hang_corners: 0 # num of corners to hang dlo from (options: 0,1,2)
+
+custom_static_particles: [0,27] # specify the particle (segment) ids to set as static
+# Note: we also create an odom subscriber for each custom static particle to update their poses online.
+# Note: The specified ids must be in range of "dlo_num_segments" parameter.
+
+custom_static_particles_odom_topic_prefix: "custom_static_particles_odom_"
+# Note: The topics names will include the id number in the end. 
+# For example, for custom_static_particles_odom_topic_prefix: "custom_static_particles_odom_"
+# and custom_static_particles: [0,27], we will have two odom subscriber topics named:
+# "custom_static_particles_odom_0" and "custom_static_particles_odom_27"
+
+use_direct_kkt_solver: false # parameter to select direct KKT/GS or GS (default: false)
+# KKT/GS is more efficient however cannot handle more than one fixed points 
+# due to the acylic requirement!!!!
+
+simulation_rate: 2333.3
+rendering_rate: 30.0 # Hz, frequency to publish the dlo vertices and edges to RVIZ visualization markers
+
+# wrench_pub_rate: 100.0 # Hz, frequency to publish the dlo forces at the attachment points
+
+dlo_points_topic_name: "dlo_points" # topic name to publish the RVIZ visualization marker msgs
+dlo_points_frame_id: "map" # the reference tf frame ID that the visualization marker msgs are published in.
+
+point_marker_scale: 0.015
+
+point_marker_color_r: 1.0
+point_marker_color_g: 0.0
+point_marker_color_b: 1.0
+point_marker_color_a: 1.0
+
+line_marker_scale_multiplier: 1.0
+
+line_marker_color_r: 0.0
+line_marker_color_g: 1.0
+line_marker_color_b: 1.0
+line_marker_color_a: 1.0
+
+# # Odometry topics that publishes robot positions to the dlo simulator
+odom_01_topic_name: "d1/ground_truth/fabric_mount/odom"
+odom_02_topic_name: "d2/ground_truth/fabric_mount/odom"
+odom_03_topic_name: "d3/ground_truth/fabric_mount/odom"
+odom_04_topic_name: "d4/ground_truth/fabric_mount/odom"
+
+dlo_rob_z_offset_: 0.0 # z offset between the specified frame and dlo attachement
+
+# # TF frame names that the dlo is assumed to be attached.
+# wrench_01_frame_id: "d1_tf_fabric_mount_link"
+# wrench_02_frame_id: "d2_tf_fabric_mount_link"
+# wrench_03_frame_id: "d3_tf_fabric_mount_link"
+# wrench_04_frame_id: "d4_tf_fabric_mount_link"
+
+# # Published topic names of the forces of attached robots.
+# wrench_01_topic_name: "d1/dlo_wrench_stamped"
+# wrench_02_topic_name: "d2/dlo_wrench_stamped"
+# wrench_03_topic_name: "d3/dlo_wrench_stamped"
+# wrench_04_topic_name: "d4/dlo_wrench_stamped"
+

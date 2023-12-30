@@ -1,0 +1,21 @@
+object_marker_topic_name: "/dlo_points"
+pub_distance_topic_name: "/distance_to_obj"
+
+pub_rate_min_distance: 50 # depending on the complexity of the fabric and the polyhedron, this rate may not be achieved
+
+pub_distance_topic_name: "/distance_to_obj"
+
+viz_mesh_topic_name: "/mesh"
+viz_min_distance_line_topic_name: "/min_distance_line_marker"
+viz_min_distance_line_color_rgba: [1.0, 1.0, 1.0, 1.0]
+viz_mesh_color_rgba: [0.0, 0.0, 0.0, 0.5]
+
+mesh_model_obj_file_path: $(find deformable_manipulations_centralized_rope)/models/surface_floor_u_gate.obj
+max_mesh_faces: 100 # if the loaded object file has more than this parameter faces, it will be simplified.
+mesh_translation: [0, -5.0, -1.0]
+mesh_rotationAxis: [1, 0, 0]
+mesh_rotationAngle: 0.0 # 90.0 # degrees
+mesh_scale: [1, 1, 1]
+
+mesh_publish: True # For visualization of the obstacle object
+pub_rate_mesh: 0.5

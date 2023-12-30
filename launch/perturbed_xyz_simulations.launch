@@ -1,0 +1,190 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- Particle ID parameter: MAKE SURE YOU SPECIFY IT CORRECTLY -->
+    <arg name="particle_id" default="0"/> 
+
+    <!-- DLO Default parameter file location -->
+    <arg name="dlo_simulator_config"              
+        default="$(find deformable_manipulations_centralized_rope)/config/dlo_simulator.yaml"/>
+    <arg name="dlo_simulator_subs_config"              
+        default="$(find deformable_manipulations_centralized_rope)/config/dlo_simulator_subs_two_rope.yaml"/>
+    
+    <arg name="object_to_mesh_distance_config" 
+        default="$(find deformable_manipulations_centralized_rope)/config/object_to_mesh_distance.yaml"/>
+
+    <!-- Change below argument values to match with the yaml files -->
+    <arg name="dlo_points_topic_name" 
+        default="dlo_points"/>
+        
+    <arg name="custom_static_particles_odom_topic_prefix" 
+        default="odom_particle_"/>
+    <arg name="odom_follower_particle_topic_prefix" 
+        default="odom_follower_"/>
+    <arg name="dlo_node_console_logs" 
+        default="log"/>
+
+    <!-- x -->
+    <group>
+        <arg name="axis" value="x" />
+        
+        <arg name="simulation_name_prefix" value="dlo_simulator_" />
+        <arg name="distance_publisher_name_prefix" value="dlo_to_polygon_distance_" />
+        
+        <arg name="axis_str" value="" if="$(eval arg('axis') == '')" />
+        <arg name="axis_str" value="_$(arg axis)" unless="$(eval arg('axis') == '')" />
+
+        <arg name="simulation_name" value="$(arg simulation_name_prefix)$(arg particle_id)$(arg axis_str)" />
+        <arg name="distance_publisher_name" value="$(arg distance_publisher_name_prefix)$(arg particle_id)$(arg axis_str)" />
+
+        <!-- Load parameters into dlo_simulator's private namespace -->
+        <include file="$(find deformable_manipulations_centralized_rope)/launch/load_parameters.launch">
+            <arg name="namespace" value="$(arg simulation_name)" />
+            <arg name="dlo_simulator_config" value="$(arg dlo_simulator_config)" />
+            <arg name="dlo_simulator_subs_config" value="$(arg dlo_simulator_subs_config)" />
+        </include>
+
+        <!-- Simulation -->
+        <node type="dlo_simulator_stiff_rods_node" name="$(arg simulation_name)" pkg="dlo_simulator_stiff_rods" output="$(arg dlo_node_console_logs)">        
+            <remap from="/$(arg custom_static_particles_odom_topic_prefix)$(arg particle_id)" 
+                to="/$(arg odom_follower_particle_topic_prefix)$(arg particle_id)$(arg axis_str)"/>
+            <remap from="/$(arg dlo_points_topic_name)" 
+                to="/$(arg dlo_points_topic_name)_$(arg particle_id)$(arg axis_str)"/>
+
+            <rosparam param="point_marker_scale"                        subst_value="true">0.005</rosparam>
+            
+            <rosparam param="point_marker_color_r"                      subst_value="true">1.0</rosparam>
+            <rosparam param="point_marker_color_g"                      subst_value="true">0.0</rosparam>
+            <rosparam param="point_marker_color_b"                      subst_value="true">0.0</rosparam>
+            <rosparam param="point_marker_color_a"                      subst_value="true">0.6</rosparam>
+
+            <rosparam param="line_marker_scale_multiplier"              subst_value="true">6</rosparam>
+
+            <rosparam param="line_marker_color_r"                       subst_value="true">1.0</rosparam>
+            <rosparam param="line_marker_color_g"                       subst_value="true">0.0</rosparam>
+            <rosparam param="line_marker_color_b"                       subst_value="true">0.0</rosparam>
+            <rosparam param="line_marker_color_a"                       subst_value="true">0.6</rosparam>
+
+        </node>
+
+        <!-- Launch the Distance Publisher between the DLO and the specified Mesh (3D) -->
+        <node type="object_to_mesh_distance.py" name="$(arg distance_publisher_name)" pkg="deformable_manipulations_centralized_rope" output="screen">
+            <rosparam command="load" file="$(arg object_to_mesh_distance_config)" subst_value="true" />
+            <rosparam param="object_marker_topic_name"          subst_value="true">/$(arg dlo_points_topic_name)_$(arg particle_id)$(arg axis_str)</rosparam>
+            <rosparam param="pub_distance_topic_name"           subst_value="true">/min_distance_$(arg particle_id)$(arg axis_str)</rosparam>
+            <rosparam param="viz_mesh_topic_name"               subst_value="true">/obstacle_mesh_$(arg particle_id)$(arg axis_str)</rosparam>
+            <rosparam param="viz_min_distance_line_topic_name"  subst_value="true">/min_distance_line_marker_$(arg particle_id)$(arg axis_str)</rosparam>
+            <rosparam param="viz_min_distance_line_color_rgba"  subst_value="true">[1.0, 0.0, 0.0, 1.0]</rosparam>
+            <rosparam param="mesh_publish"                      subst_value="true">True</rosparam>
+        </node>
+    </group>
+    <!-- y -->
+    <group>
+        <arg name="axis" value="y" />
+        
+        <arg name="simulation_name_prefix" value="dlo_simulator_" />
+        <arg name="distance_publisher_name_prefix" value="dlo_to_polygon_distance_" />
+        
+        <arg name="axis_str" value="" if="$(eval arg('axis') == '')" />
+        <arg name="axis_str" value="_$(arg axis)" unless="$(eval arg('axis') == '')" />
+
+        <arg name="simulation_name" value="$(arg simulation_name_prefix)$(arg particle_id)$(arg axis_str)" />
+        <arg name="distance_publisher_name" value="$(arg distance_publisher_name_prefix)$(arg particle_id)$(arg axis_str)" />
+
+        <!-- Load parameters into dlo_simulator's private namespace -->
+        <include file="$(find deformable_manipulations_centralized_rope)/launch/load_parameters.launch">
+            <arg name="namespace" value="$(arg simulation_name)" />
+            <arg name="dlo_simulator_config" value="$(arg dlo_simulator_config)" />
+            <arg name="dlo_simulator_subs_config" value="$(arg dlo_simulator_subs_config)" />
+        </include>
+
+        <!-- Simulation -->
+        <node type="dlo_simulator_stiff_rods_node" name="$(arg simulation_name)" pkg="dlo_simulator_stiff_rods" output="$(arg dlo_node_console_logs)">        
+            <remap from="/$(arg custom_static_particles_odom_topic_prefix)$(arg particle_id)" 
+                to="/$(arg odom_follower_particle_topic_prefix)$(arg particle_id)$(arg axis_str)"/>
+            <remap from="/$(arg dlo_points_topic_name)" 
+                to="/$(arg dlo_points_topic_name)_$(arg particle_id)$(arg axis_str)"/>
+
+            <rosparam param="point_marker_scale"                        subst_value="true">0.005</rosparam>
+            
+            <rosparam param="point_marker_color_r"                      subst_value="true">0.0</rosparam>
+            <rosparam param="point_marker_color_g"                      subst_value="true">1.0</rosparam>
+            <rosparam param="point_marker_color_b"                      subst_value="true">0.0</rosparam>
+            <rosparam param="point_marker_color_a"                      subst_value="true">0.6</rosparam>
+
+            <rosparam param="line_marker_scale_multiplier"              subst_value="true">6</rosparam>
+
+            <rosparam param="line_marker_color_r"                       subst_value="true">0.0</rosparam>
+            <rosparam param="line_marker_color_g"                       subst_value="true">1.0</rosparam>
+            <rosparam param="line_marker_color_b"                       subst_value="true">0.0</rosparam>
+            <rosparam param="line_marker_color_a"                       subst_value="true">0.6</rosparam>
+
+        </node>
+
+        <!-- Launch the Distance Publisher between the DLO and the specified Mesh (3D) -->
+        <node type="object_to_mesh_distance.py" name="$(arg distance_publisher_name)" pkg="deformable_manipulations_centralized_rope" output="screen">
+            <rosparam command="load" file="$(arg object_to_mesh_distance_config)" subst_value="true" />
+            <rosparam param="object_marker_topic_name"          subst_value="true">/$(arg dlo_points_topic_name)_$(arg particle_id)$(arg axis_str)</rosparam>
+            <rosparam param="pub_distance_topic_name"           subst_value="true">/min_distance_$(arg particle_id)$(arg axis_str)</rosparam>
+            <rosparam param="viz_mesh_topic_name"               subst_value="true">/obstacle_mesh_$(arg particle_id)$(arg axis_str)</rosparam>
+            <rosparam param="viz_min_distance_line_topic_name"  subst_value="true">/min_distance_line_marker_$(arg particle_id)$(arg axis_str)</rosparam>
+            <rosparam param="viz_min_distance_line_color_rgba"  subst_value="true">[0.0, 1.0, 0.0, 1.0]</rosparam>
+            <rosparam param="mesh_publish"                      subst_value="true">True</rosparam>
+        </node>
+    </group>
+    <!-- z -->
+    <group>
+        <arg name="axis" value="z" />
+        
+        <arg name="simulation_name_prefix" value="dlo_simulator_" />
+        <arg name="distance_publisher_name_prefix" value="dlo_to_polygon_distance_" />
+        
+        <arg name="axis_str" value="" if="$(eval arg('axis') == '')" />
+        <arg name="axis_str" value="_$(arg axis)" unless="$(eval arg('axis') == '')" />
+
+        <arg name="simulation_name" value="$(arg simulation_name_prefix)$(arg particle_id)$(arg axis_str)" />
+        <arg name="distance_publisher_name" value="$(arg distance_publisher_name_prefix)$(arg particle_id)$(arg axis_str)" />
+
+        <!-- Load parameters into dlo_simulator's private namespace -->
+        <include file="$(find deformable_manipulations_centralized_rope)/launch/load_parameters.launch">
+            <arg name="namespace" value="$(arg simulation_name)" />
+            <arg name="dlo_simulator_config" value="$(arg dlo_simulator_config)" />
+            <arg name="dlo_simulator_subs_config" value="$(arg dlo_simulator_subs_config)" />
+        </include>
+
+        <!-- Simulation -->
+        <node type="dlo_simulator_stiff_rods_node" name="$(arg simulation_name)" pkg="dlo_simulator_stiff_rods" output="$(arg dlo_node_console_logs)">        
+            <remap from="/$(arg custom_static_particles_odom_topic_prefix)$(arg particle_id)" 
+                to="/$(arg odom_follower_particle_topic_prefix)$(arg particle_id)$(arg axis_str)"/>
+            <remap from="/$(arg dlo_points_topic_name)" 
+                to="/$(arg dlo_points_topic_name)_$(arg particle_id)$(arg axis_str)"/>
+
+            <rosparam param="point_marker_scale"                        subst_value="true">0.005</rosparam>
+            
+            <rosparam param="point_marker_color_r"                      subst_value="true">0.0</rosparam>
+            <rosparam param="point_marker_color_g"                      subst_value="true">0.0</rosparam>
+            <rosparam param="point_marker_color_b"                      subst_value="true">1.0</rosparam>
+            <rosparam param="point_marker_color_a"                      subst_value="true">0.6</rosparam>
+            
+            <rosparam param="line_marker_scale_multiplier"              subst_value="true">6</rosparam>
+
+            <rosparam param="line_marker_color_r"                       subst_value="true">0.0</rosparam>
+            <rosparam param="line_marker_color_g"                       subst_value="true">0.0</rosparam>
+            <rosparam param="line_marker_color_b"                       subst_value="true">1.0</rosparam>
+            <rosparam param="line_marker_color_a"                       subst_value="true">0.6</rosparam>
+
+        </node>
+
+        <!-- Launch the Distance Publisher between the DLO and the specified Mesh (3D) -->
+        <node type="object_to_mesh_distance.py" name="$(arg distance_publisher_name)" pkg="deformable_manipulations_centralized_rope" output="screen">
+            <rosparam command="load" file="$(arg object_to_mesh_distance_config)" subst_value="true" />
+            <rosparam param="object_marker_topic_name"          subst_value="true">/$(arg dlo_points_topic_name)_$(arg particle_id)$(arg axis_str)</rosparam>
+            <rosparam param="pub_distance_topic_name"           subst_value="true">/min_distance_$(arg particle_id)$(arg axis_str)</rosparam>
+            <rosparam param="viz_mesh_topic_name"               subst_value="true">/obstacle_mesh_$(arg particle_id)$(arg axis_str)</rosparam>
+            <rosparam param="viz_min_distance_line_topic_name"  subst_value="true">/min_distance_line_marker_$(arg particle_id)$(arg axis_str)</rosparam>
+            <rosparam param="viz_min_distance_line_color_rgba"  subst_value="true">[0.0, 0.0, 1.0, 1.0]</rosparam>
+            <rosparam param="mesh_publish"                      subst_value="true">True</rosparam>
+        </node>
+    </group>
+
+</launch>
